@@ -76,7 +76,7 @@ export interface IBusket {
 export interface IContacts {
     address: string;
     mail: string;
-    phone: number;
+    phone: string;
 }
 ```
 

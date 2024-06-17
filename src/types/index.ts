@@ -1,36 +1,33 @@
 export interface ICard {
     id: string;
-    description: string;
-    image: string;
+    description: string | null;
+    image: string | null;
     title: string;
-    category: string;
-    price: number | null;
+    category: string | null;
+    price: number | string;
 }
 
 export interface IBusket {
     id: string;
-    price: number | null;
+    price: number | string;
     title: string;
 }
 
 export interface IContacts {
     address: string;
     mail: string;
-    phone: number;
+    phone: string;
 }
 
 export interface ICardsData {
     cards: ICard[];
     preview: string | null;
-    buyCard(cardId: string, payload: Function | null): void;
-    getCard(cardId: string): ICard;
-    updateBusket(): IBusket[];
 }
 
 export interface IBusketData {
     busket: IBusket[];
     deleteCard(cardId: string, payload: Function | null): void;
-    summPrice(price: number, payload: Function | null): void;
+    summPrice(price: string, payload: Function | null): void;
 }
 
 export interface IContactsData {
@@ -43,3 +40,11 @@ export type TProduct = Pick<ICard, 'id' | 'image' | 'title' | 'price' | 'categor
 export type TAddress = Pick<IContacts, 'address'>;
 
 export type TCommunication = Pick<IContacts, 'mail' | 'phone'>
+
+export type ApiPostMethods = 'POST' | 'PUT' 
+
+export interface IApi {
+    baseUrl: string;
+    get<T>(uri:string): Promise<T>;
+    post<T>(uri:string, data:object, method?: ApiPostMethods): Promise<T>;
+}
