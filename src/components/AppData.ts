@@ -114,4 +114,9 @@ export class AppState extends Model<ICardsData> {
             items: this.basket.map(item => item.id),
         };
     }
+
+    clearBasket() {
+        this.basket = [];
+        this.events.emit('basket:updated', this.basket);
+    }
 }

@@ -1,12 +1,11 @@
 import { AppApi } from './components/AppApi';
 import { Api } from './components/base/api';
-import { EventEmitter, IEvents } from './components/base/events';
+import { EventEmitter } from './components/base/events';
 import './scss/styles.scss';
-import { IApi, ICardsData, IContactsForm, TAddress, TCommunication, IOrder} from './types';
+import { IApi, TAddress, TCommunication} from './types';
 import { API_URL, settings, CDN_URL} from './utils/constants';
 import { cloneTemplate, createElement, ensureElement } from './utils/utils';
 import { Card } from './components/Card';
-import { ICard } from './types';
 import { CardsContainer } from './components/CardContainer';
 import { Modal } from './components/Modal';
 import { Page } from './components/Page';
@@ -93,7 +92,6 @@ events.on('card:select', (item: CardItem) => {
 
 events.on('card:buy', (item: CardItem) => {
     appData.addToBasket(item);
-    // appData.toggleOrderedCard(item.id, true);
 });
 
 events.on('basket:updated', (basket: CardItem[]) => {
@@ -101,7 +99,7 @@ events.on('basket:updated', (basket: CardItem[]) => {
         const card = new Card(cloneTemplate(cardBasketTemplate), events, {
             onClick: () => events.emit('card:delete', item)
         });
-        card.index = index + 1; // Устанавливаем индекс элемента в корзине
+        card.index = index + 1;
         return card.render(item);
     });
     busket.items = basketItems;
@@ -112,7 +110,6 @@ events.on('basket:updated', (basket: CardItem[]) => {
 
 events.on('card:delete', (item: CardItem) => {
     appData.removeFromBasket(item)
-    // appData.toggleOrderedCard(item.id, false);
 })
 
 events.on('basket:open', () => {
@@ -152,7 +149,6 @@ events.on('formErrorsСontacts:change', (errors: Partial<TCommunication>) => {
 events.on(/^contacts\..*:change/, (data: { field: keyof TCommunication, value: string }) => {
     appData.setContatsField(data.field, data.value);
 });
-// Метод валидации контактных данных
 
 events.on('order:submit', () => {
     modal.render({
@@ -175,42 +171,26 @@ events.on('choose:online', () => {
 
 events.on('contacts:submit', () => {
     const orderData = appData.getOrderData();
-    
+
     api.postCards(orderData)
         .then(response => {
-            console.log('Order submitted successfully:', response);
             const total = response.total;
-            const success = new Success(cloneTemplate(successTemplate), {
-                onClick: () => {
-                    modal.close();
-                }
-            });
+            const success = new Success(cloneTemplate(successTemplate), events);
+            success.total = total; 
+            success.render();
             modal.render({
-                content: success.render({ total })
+                content: success.render({})
             });
         })
         .catch(error => {
             console.error('Ошибка при отправке заказа на сервер:', error);
-            events.emit('order:submissionFailed', error);
         });
 });
 
-// events.on('contacts:submit', () => {
-//     api.postCards(appData.getOrderData())
-//     .then((result) => {
-//     })
-// })
-
-// events.on('contacts:submit', () => {
-//     const success = new Success(cloneTemplate(successTemplate), {
-//         onClick: () => {
-//             modal.close();
-//         }
-//     });
-//     modal.render({
-//         content: success.render({})
-//     });
-// })
+events.on('success:close', () => {
+    modal.close(),
+    appData.clearBasket()
+})
 
 events.on('modal:open', () => {
     page.locked = true;

@@ -42,9 +42,9 @@ export class Busket extends Component<IBusketView> {
 
     set selected(items: string[]) {
         if (items.length > 0) {
-            this.setDisabled(this.button, false); // Разблокировать кнопку, если есть элементы в корзине
+            this.setDisabled(this.button, false); 
         } else {
-            this.setDisabled(this.button, true); // Заблокировать кнопку, если корзина пуста
+            this.setDisabled(this.button, true); 
         }
     }
 

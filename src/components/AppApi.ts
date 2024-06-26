@@ -22,15 +22,5 @@ export class AppApi {
         console.log('Отправка заказа на сервер:', order);
         return this._baseApi.post<IOrder>(`/order`, order)
             .then((response: IOrder) => response)
-            .catch(error => {
-                console.error('Ошибка при отправке заказа на сервер:', error);
-                throw error; // Повторно выбросим ошибку для ее обработки в вызывающем коде
-            });
     }
-
-    // postCards(order: IOrder): Promise<IOrderResult> {
-    //     return this._baseApi.post('/order', order).then(
-    //         (data: IOrderResult) => data
-    //     )
-    // }
 }
