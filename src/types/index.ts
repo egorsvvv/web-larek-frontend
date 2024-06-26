@@ -7,39 +7,28 @@ export interface ICard {
     price: number | string;
 }
 
-export interface IBusket {
-    id: string;
-    price: number | string;
-    title: string;
-}
-
-export interface IContacts {
+export interface IContactsForm {
     address: string;
-    mail: string;
+    email: string;
     phone: string;
 }
 
 export interface ICardsData {
     cards: ICard[];
     preview: string | null;
+    basket?: string[];
+    order?: IContacts | null;
+    loading?: boolean;
 }
+export type FormErrors = Partial<Record<keyof IContacts, string>>;
 
-export interface IBusketData {
-    busket: IBusket[];
-    deleteCard(cardId: string, payload: Function | null): void;
-    summPrice(price: string, payload: Function | null): void;
+export type TAddress = Pick<IContactsForm, 'address'>;
+
+export type TCommunication = Pick<IContactsForm, 'email' | 'phone'>
+
+export interface IContacts extends IContactsForm {
+    items: string[];
 }
-
-export interface IContactsData {
-    checkAddressValidation(data: Record<keyof TAddress, string>): boolean;
-    checkCommunicationValidation(data: Record<keyof TCommunication, string | number>): boolean;
-}
-
-export type TProduct = Pick<ICard, 'id' | 'image' | 'title' | 'price' | 'category'>;
-
-export type TAddress = Pick<IContacts, 'address'>;
-
-export type TCommunication = Pick<IContacts, 'mail' | 'phone'>
 
 export type ApiPostMethods = 'POST' | 'PUT' 
 
@@ -47,4 +36,14 @@ export interface IApi {
     baseUrl: string;
     get<T>(uri:string): Promise<T>;
     post<T>(uri:string, data:object, method?: ApiPostMethods): Promise<T>;
+}
+
+export interface IOrder extends IContactsForm {
+    items: string[],
+    payment: string,
+    total: number
+}
+
+export interface IOrderResult {
+    id: string;
 }

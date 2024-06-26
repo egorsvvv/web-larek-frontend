@@ -1,34 +1,54 @@
-// import { IEvents } from "./events";
-// import { IBusket, IBusketData } from "../../types";
+import { Component } from "./base/Component";
+import { ensureElement, createElement, formatNumber } from "../utils/utils";
+import { EventEmitter } from "./base/events";
 
-// export class BusketData implements IBusketData {
-//     protected _busket: IBusket[];
-//     protected events: IEvents;
+interface IBusketView {
+    items: HTMLElement[];
+    total: number | string;
+    selected: string[];
+}
 
-//     constructor(events: IEvents) {
-//         this._busket = []; // Инициализируем пустым массивом
-//         this.events = events;
-//     }
+export class Busket extends Component<IBusketView> {
+    protected list: HTMLElement;
+    protected _total: HTMLElement;
+    protected button: HTMLButtonElement;
+    protected selectedItems: Set<string>;
 
-//     // Сеттер для корзины
-//     set busket(busket: IBusket[]) {
-//         this._busket = busket;
-//         this.events.emit('busket:changed'); // Вызываем событие при изменении корзины
-//     }
+    constructor(container: HTMLElement, protected events: EventEmitter) {
+        super(container);
 
-//     // Геттер для корзины
-//     get busket() {
-//         return this._busket;
-//     }
+        this.list = ensureElement<HTMLElement>('.basket__list', this.container);
+        this._total =  this.container.querySelector('.basket__price');
+        this.button = this.container.querySelector('.basket__button');
 
-//     // Метод удаления карточки из корзины
-//     deleteCard(cardId: string, payload: Function | null): void {
-//         this._busket = this._busket.filter(card => card.id !== cardId);
-//         this.events.emit('busket:changed'); // Вызываем событие при изменении корзины
-//         if (payload) payload(cardId);
-//     }
+        if (this.button) {
+            this.button.addEventListener('click', () => {
+                events.emit('order:open');
+            });
+        }
 
-//     summPrice(): number {
-//         return this._busket.reduce((sum, card) => sum + (card.price || 0), 0);
-//     }
-// }
+        this.items = [];
+    }
+
+    set items(items: HTMLElement[]) {
+        if (items.length) {
+            this.list.replaceChildren(...items);
+        } else {
+            this.list.replaceChildren(createElement<HTMLParagraphElement>('p', {
+                textContent: 'Корзина пуста'
+            }));
+        }
+    }
+
+    set selected(items: string[]) {
+        if (items.length > 0) {
+            this.setDisabled(this.button, false); // Разблокировать кнопку, если есть элементы в корзине
+        } else {
+            this.setDisabled(this.button, true); // Заблокировать кнопку, если корзина пуста
+        }
+    }
+
+    set total(total: number) {
+        this.setText(this._total, `${formatNumber(total)} синапсов`);
+    }
+}
