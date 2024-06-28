@@ -11,6 +11,7 @@ export interface IContactsForm {
     address: string;
     email: string;
     phone: string;
+    valid?: boolean
 }
 
 export interface ICardsData {
@@ -22,7 +23,7 @@ export interface ICardsData {
 }
 export type FormErrors = Partial<Record<keyof IContacts, string>>;
 
-export type TAddress = Pick<IContactsForm, 'address'>;
+export type TAddress = Pick<IContactsForm, 'address' | "valid">;
 
 export type TCommunication = Pick<IContactsForm, 'email' | 'phone'>
 

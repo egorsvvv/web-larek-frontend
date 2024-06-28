@@ -59,13 +59,13 @@ export class Form<T> extends Component<IFormState>{
 export class Order extends Form<TAddress> {
     private cashBtn: HTMLButtonElement;
     private onlineBtn: HTMLButtonElement;
+    private addressInput: HTMLInputElement;
 
     constructor(protected container: HTMLFormElement, protected events: IEvents) {
         super(container, events)
-        const addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
+        this.addressInput = this.container.elements.namedItem('address') as HTMLInputElement;
 
-
-        addressInput.addEventListener('input', (event) => {
+        this.addressInput.addEventListener('input', (event) => {
             const value = (event.target as HTMLInputElement).value;
             this.events.emit(`${this.container.name}.address:change`, { field: 'address', value });
         });
@@ -85,33 +85,36 @@ export class Order extends Form<TAddress> {
     }
 
     set address(value: string) {
-        (this.container.elements.namedItem('address') as HTMLInputElement).value = value;
+        this.addressInput.value = value;
+        this.events.emit(`${this.container.name}.address:change`, { field: 'address', value });
     }
 }
 
 export class Contacts extends Form<TCommunication> {
+    private emailInput: HTMLInputElement;
+    private phoneInput: HTMLInputElement;
 
     constructor(protected container: HTMLFormElement, protected events: IEvents) {
         super(container, events);
-        const emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
-        const phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
+        this.emailInput = this.container.elements.namedItem('email') as HTMLInputElement;
+        this.phoneInput = this.container.elements.namedItem('phone') as HTMLInputElement;
 
-        emailInput.addEventListener('input', (event) => {
+        this.emailInput.addEventListener('input', (event) => {
             const value = (event.target as HTMLInputElement).value;
-            this.events.emit(`${this.container.name}.email:change`, { field: 'mail', value });
+            this.events.emit(`${this.container.name}.email:change`, { field: 'email', value });
         });
 
-        phoneInput.addEventListener('input', (event) => {
+        this.phoneInput.addEventListener('input', (event) => {
             const value = (event.target as HTMLInputElement).value;
             this.events.emit(`${this.container.name}.phone:change`, { field: 'phone', value });
         });
     }
 
     set phone(value: string) {
-        (this.container.elements.namedItem('phone') as HTMLInputElement).value = value;
+        this.phoneInput.value = value;
     }
 
     set mail(value: string) {
-        (this.container.elements.namedItem('email') as HTMLInputElement).value = value;
+        this.emailInput.value = value;
     }
 }

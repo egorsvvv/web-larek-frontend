@@ -32,7 +32,7 @@ export class Card extends Component<ICard>{
         this.cardDescription = this.container.querySelector('.card__text');
         this.button = this.container.querySelector('.card__button');
         this.busketIndex = this.container.querySelector('.basket__item-index')
-
+        
         if (actions?.onClick) {
             if (this.button) {
                 this.button.addEventListener('click', actions.onClick);
@@ -57,7 +57,7 @@ export class Card extends Component<ICard>{
 
 
     set description(value: string | undefined) {
-        if (this.cardDescription) this.cardDescription.textContent = value || '';
+        if (this.cardDescription) this.setText(this.cardDescription, value || '');
     }
 
 
@@ -69,7 +69,7 @@ export class Card extends Component<ICard>{
     }
 
     set category(value: string | undefined) {
-        if (this.cardCategory) this.cardCategory.textContent = value || '';
+        if (this.cardCategory) this.setText(this.cardCategory, value || '');
     }
 
     set title(value: string) {
@@ -78,18 +78,16 @@ export class Card extends Component<ICard>{
 
     set price(value: number | null) {
         const priceText = value !== null ? `${value} синапсов` : 'Бесплатно';
-        this.cardPrice.textContent = priceText;
+        this.setText(this.cardPrice, priceText);
     }
 
     set buttonDisabled(disabled: boolean) {
-        if (this.button) {
-            this.button.disabled = disabled;
-        }
+        this.setDisabled(this.button, disabled);
     }
 
     set index(index: number) {
         if (this.busketIndex) {
-            this.busketIndex.textContent = index.toString();
+            this.setText(this.busketIndex, index.toString());
         }
     }
 }

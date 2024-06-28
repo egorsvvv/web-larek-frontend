@@ -30,6 +30,7 @@ export class AppState extends Model<ICardsData> {
     loading: boolean;
     order: TAddress = {
         address: '',
+        valid: false
     };
     contacts: TCommunication = {
         email: '',
@@ -37,7 +38,7 @@ export class AppState extends Model<ICardsData> {
     }
     preview: string | null;
     formErrors: FormErrors = {};
-    paymentMethod: 'online' | 'offline';
+    paymentMethod: 'online' | 'offline' | null;
 
     addToBasket(item: CardItem) {
         this.basket.push(item);
@@ -64,9 +65,10 @@ export class AppState extends Model<ICardsData> {
         return this.basket.some(item => item.id === id);
     }
 
-    setOrderField(field: keyof TAddress, value: string) {
+    setOrderField(field: 'address', value: string) {
         this.order[field] = value;
         this.validateOrder();
+        this.validateNextButton();
     }
 
     setContatsField(field: keyof TCommunication, value: string) {
@@ -100,8 +102,9 @@ export class AppState extends Model<ICardsData> {
         return Object.keys(errors).length === 0;
     }
 
-    setPaymentMethod(method:'online' | 'offline') {
+    setPaymentMethod(method: 'online' | 'offline') {
         this.paymentMethod = method;
+        this.validateNextButton();
     }
 
     getOrderData(): IOrder {
@@ -118,5 +121,22 @@ export class AppState extends Model<ICardsData> {
     clearBasket() {
         this.basket = [];
         this.events.emit('basket:updated', this.basket);
+    }
+
+    
+    clearPaymentMethod() {
+        this.paymentMethod = null;
+        this.validateNextButton();
+    }
+
+    validateNextButton() {
+        const isValidOrder = this.validateOrder();
+        const paymentMethodChosen = this.paymentMethod === 'online' || this.paymentMethod === 'offline';
+        const isNextButtonValid = isValidOrder && paymentMethodChosen;
+        this.order.valid = isNextButtonValid;
+        const validationData = {
+            isValid: this.order.valid
+        };
+        this.events.emit('nextButton:validate', validationData);
     }
 }

@@ -9,7 +9,7 @@ import { Card } from './components/Card';
 import { CardsContainer } from './components/CardContainer';
 import { Modal } from './components/Modal';
 import { Page } from './components/Page';
-import { AppState, CardItem, } from './components/AppData';
+import { AppState, CardItem } from './components/AppData';
 import { Busket } from './components/Busket';
 import { Order, Contacts} from './components/Form';
 import { Success } from './components/Success';
@@ -46,10 +46,7 @@ events.onAll(({ eventName, data }) => {
 Promise.all([api.getCards()])
     .then(([response]) => {
         if (response && Array.isArray(response.items)) {
-            const items = response.items.map(item => ({
-                ...item,
-            }));
-            appData.setCards(items);
+            appData.setCards(response.items);
             events.emit('initialData:loaded');
         }
     })
@@ -60,7 +57,10 @@ Promise.all([api.getCards()])
 events.on('initialData:loaded', () => {
     const cardsArray = appData.catalog.map(item => {
         const card = new Card(cloneTemplate(cardCatalogTemplate), events, {
-            onClick: () => events.emit('card:select', item)
+            onClick: () => {
+                appData.isItemInBasket(item.id)
+                events.emit('card:select', item)
+            }
         });
         return card.render(item);
     });
@@ -70,9 +70,13 @@ events.on('initialData:loaded', () => {
 events.on('card:select', (item: CardItem) => {
     const card = new Card(cloneTemplate(cardPreviewTemplate), events, {
         onClick: () => {
-            events.emit('card:buy', item);
-            const isInBasket = appData.isItemInBasket(item.id);
-            card.buttonDisabled = isInBasket;
+            if (typeof item.price === 'number' && item.price > 0) {
+                events.emit('card:buy', item);
+                const isInBasket = appData.isItemInBasket(item.id);
+                card.buttonDisabled = isInBasket;
+            } else {
+                console.warn('Нельзя добавить бесценный товар в заказ');
+            }
         }
     });
     const isInBasket = appData.isItemInBasket(item.id);
@@ -97,7 +101,9 @@ events.on('card:buy', (item: CardItem) => {
 events.on('basket:updated', (basket: CardItem[]) => {
     const basketItems = basket.map((item, index) => {
         const card = new Card(cloneTemplate(cardBasketTemplate), events, {
-            onClick: () => events.emit('card:delete', item)
+            onClick: () => {
+                events.emit('card:delete', item);
+            }
         });
         card.index = index + 1;
         return card.render(item);
@@ -109,7 +115,7 @@ events.on('basket:updated', (basket: CardItem[]) => {
 });
 
 events.on('card:delete', (item: CardItem) => {
-    appData.removeFromBasket(item)
+    appData.removeFromBasket(item);
 })
 
 events.on('basket:open', () => {
@@ -127,7 +133,10 @@ events.on('formErrorsOrder:change', (errors: Partial<TAddress>) => {
 });
 
 events.on(/^order\..*:change/, (data: { field: keyof TAddress, value: string }) => {
-    appData.setOrderField(data.field, data.value);
+    if (data.field === 'address') {
+        appData.setOrderField(data.field, data.value);
+        appData.validateNextButton()
+    }
 });
 
 events.on('order:open', () => {
@@ -148,6 +157,8 @@ events.on('formErrorsСontacts:change', (errors: Partial<TCommunication>) => {
 
 events.on(/^contacts\..*:change/, (data: { field: keyof TCommunication, value: string }) => {
     appData.setContatsField(data.field, data.value);
+    appData.validateContacts();
+    appData.validateNextButton();
 });
 
 events.on('order:submit', () => {
@@ -163,11 +174,18 @@ events.on('order:submit', () => {
 
 events.on('choose:offline', () => {
     appData.setPaymentMethod('offline');
+    appData.validateNextButton()
 });
 
 events.on('choose:online', () => {
     appData.setPaymentMethod('online');
+    appData.validateNextButton()
 });
+
+events.on('nextButton:validate', (validationData: { isValid: boolean }) => {
+    order.valid = validationData.isValid;
+});
+
 
 events.on('contacts:submit', () => {
     const orderData = appData.getOrderData();
@@ -189,7 +207,8 @@ events.on('contacts:submit', () => {
 
 events.on('success:close', () => {
     modal.close(),
-    appData.clearBasket()
+    appData.clearBasket();
+    appData.clearPaymentMethod();
 })
 
 events.on('modal:open', () => {
@@ -199,4 +218,3 @@ events.on('modal:open', () => {
 events.on('modal:close', () => {
     page.locked = false;
 });
-

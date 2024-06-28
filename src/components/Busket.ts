@@ -12,7 +12,6 @@ export class Busket extends Component<IBusketView> {
     protected list: HTMLElement;
     protected _total: HTMLElement;
     protected button: HTMLButtonElement;
-    protected selectedItems: Set<string>;
 
     constructor(container: HTMLElement, protected events: EventEmitter) {
         super(container);
@@ -28,6 +27,7 @@ export class Busket extends Component<IBusketView> {
         }
 
         this.items = [];
+        this.updateButtonState([]);
     }
 
     set items(items: HTMLElement[]) {
@@ -41,14 +41,14 @@ export class Busket extends Component<IBusketView> {
     }
 
     set selected(items: string[]) {
-        if (items.length > 0) {
-            this.setDisabled(this.button, false); 
-        } else {
-            this.setDisabled(this.button, true); 
-        }
+        this.updateButtonState(items);
     }
 
     set total(total: number) {
         this.setText(this._total, `${formatNumber(total)} синапсов`);
+    }
+
+    private updateButtonState(items: any[]) {
+        this.setDisabled(this.button, items.length === 0);
     }
 }
