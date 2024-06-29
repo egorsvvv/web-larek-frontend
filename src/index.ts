@@ -19,7 +19,6 @@ const events = new EventEmitter();
 const baseApi: IApi = new Api(API_URL, settings);
 const api = new AppApi(baseApi);
 
-const basketCounter = document.querySelector('.header__basket-counter');
 const cardCatalogTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const cardsContainer = new CardsContainer(document.querySelector('.gallery'));
@@ -111,7 +110,7 @@ events.on('basket:updated', (basket: CardItem[]) => {
     busket.items = basketItems;
     busket.total = basket.reduce((total, item) => total + (typeof item.price === 'number' ? item.price : 0), 0);
     busket.selected = basket.map(item => item.id);
-    basketCounter.textContent = basket.length.toString();
+    page.counter = basket.length;
 });
 
 events.on('card:delete', (item: CardItem) => {

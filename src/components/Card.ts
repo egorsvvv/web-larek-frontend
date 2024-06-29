@@ -73,7 +73,7 @@ export class Card extends Component<ICard>{
     }
 
     set title(value: string) {
-        this.cardTitle.textContent = value;
+        this.setText(this.cardTitle, value)
     }
 
     set price(value: number | null) {
